@@ -45,7 +45,7 @@ func GetDatabase() *mongo.Database {
     if DB == nil {
         log.Fatal("Database not initialized. Call database.Init() first.")
     }
-    return DB.Database(dbName)
+    return DB.Database("evediary")
 }
 
 // GetCollection returns a specific collection
