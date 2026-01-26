@@ -48,7 +48,7 @@ func main() {
     api.HandleFunc("/orders/{id}/status", handlers.UpdateOrderStatusHandler).Methods("PUT")
 
     log.Println("Server starting on port 4040...")
-    log.Fatal(http.ListenAndServe(":4040",
+    log.Fatal(http.ListenAndServe(":",
         gorillaHandlers.CORS(
             gorillaHandlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:4200", "https://eve-diary.netlify.app/"}),
             gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
