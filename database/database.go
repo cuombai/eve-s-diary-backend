@@ -1,49 +1,54 @@
 package database
 
 import (
-	"context"
-	"log"
-	"time"
-	"os"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+    "context"
+    "log"
+    "os"
+    "time"
+
+    "go.mongodb.org/mongo-driver/mongo"
+    "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// ConnectDB connects to MongoDB and returns a client instance
-func ConnectDB() *mongo.Client {
-	uri := os.Getenv("MONGODB_URI")
-	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
-	if err != nil {
-		log.Fatal(err)
-	}
+var (
+    // DB is the global client instance
+    DB *mongo.Client
+    // dbName is the name of your Atlas database
+    dbName = "evediary"
+)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel() // Important to prevent context leak
+// Init initializes the MongoDB connection once
+func Init() {
+    uri := os.Getenv("MONGODB_URI")
+    if uri == "" {
+        log.Fatal("MONGODB_URI not set")
+    }
 
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
 
-	// Ping the primary
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+    client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+    if err != nil {
+        log.Fatal("Mongo connect error:", err)
+    }
 
-	log.Println("Successfully connected to MongoDB!")
-	return client
+    if err := client.Ping(ctx, nil); err != nil {
+        log.Fatal("MongoDB connection failed:", err)
+    }
+
+    log.Println("Successfully connected to MongoDB Atlas!")
+    DB = client
 }
 
-// Client instance
-var DB *mongo.Client = ConnectDB()
-
-// GetCollection gets a collection from the database
-func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	collection := client.Database("evesdiary").Collection(collectionName)
-	return collection
-}
-
+// GetDatabase returns the main database
 func GetDatabase() *mongo.Database {
-    return DB.Database("evesdiary") // replace with your actual DB name
+    if DB == nil {
+        log.Fatal("Database not initialized. Call database.Init() first.")
+    }
+    return DB.Database(dbName)
+}
+
+// GetCollection returns a specific collection
+func GetCollection(collectionName string) *mongo.Collection {
+    return GetDatabase().Collection(collectionName)
 }

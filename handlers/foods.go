@@ -31,7 +31,7 @@ type FoodResponse struct {
 }
 
 
-var foodCollection *mongo.Collection = database.GetCollection(database.DB, "foods")
+var foodCollection *mongo.Collection = database.GetCollection( "foods")
 var imageBucket, _ = gridfs.NewBucket(database.GetDatabase())
 
 
