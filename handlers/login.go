@@ -14,7 +14,10 @@ import (
     "go.mongodb.org/mongo-driver/mongo"
 )
 
-var userCollection *mongo.Collection = database.GetCollection( "admins")
+var userCollection *mongo.Collection 
+func InitLoginHandlers(){
+	userCollection = database.GetCollection( "admins")
+}
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     var creds struct {

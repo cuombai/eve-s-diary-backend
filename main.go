@@ -16,6 +16,8 @@ func main() {
     // Use the single DB client from database.go
     database.Init() 
     handlers.OrdersCollection = database.GetCollection( "orders")
+    handlers.InitFoodHandlers()
+    handlers.InitLoginHandlers()
 
     r := mux.NewRouter()
     api := r.PathPrefix("/api").Subrouter()

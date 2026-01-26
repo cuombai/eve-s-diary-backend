@@ -31,11 +31,15 @@ type FoodResponse struct {
 }
 
 
-var foodCollection *mongo.Collection = database.GetCollection( "foods")
-var imageBucket, _ = gridfs.NewBucket(database.GetDatabase())
+var foodCollection *mongo.Collection 
+var imageBucket *gridfs.Bucket
 
 
 
+func InitFoodHandlers(){
+    foodCollection = database.GetCollection( "foods")
+    imageBucket, _ = gridfs.NewBucket(database.GetDatabase())
+}
 // Get all food items
 func GetFoods(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
