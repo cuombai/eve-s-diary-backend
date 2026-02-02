@@ -46,7 +46,7 @@ func main() {
             gorillaHandlers.AllowedOrigins([]string{
                 "http://localhost:3000",
                 "http://localhost:4200",
-                "https://eve-diary.netlify.app/",
+                "https://eve-diary.netlify.app",
             }),
             gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
             gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
