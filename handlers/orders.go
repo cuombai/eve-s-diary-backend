@@ -10,7 +10,8 @@ import (
     "go.mongodb.org/mongo-driver/mongo"
     "github.com/gorilla/mux"
     "go.mongodb.org/mongo-driver/bson"
-
+    "fmt"
+    "net/smtp"
     "eves-diary/models"
 )
 
@@ -25,7 +26,6 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Generate a new string ID
     order.ID = primitive.NewObjectID().Hex()
     order.CreatedAt = time.Now()
     if order.Status == "" {
@@ -41,9 +41,18 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // 🔔 Send notification email with customer details
+    go func() {
+        if err := SendOrderNotification(order.ID, order.CustomerName, order.CustomerPhone); err != nil {
+            fmt.Println("Failed to send notification:", err)
+        }
+    }()
+
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(order)
 }
+
+
 
 // GET /api/orders
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
@@ -139,4 +148,29 @@ func UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(updatedOrder)
+}
+
+// SendOrderNotification sends an email notification when a new order is created
+func SendOrderNotification(orderID string, customerName string, customerPhone string) error {
+    from := "your-smtp-username@example.com"
+    password := "your-smtp-password"
+    to := "curtisombai@gmail.com"
+
+    smtpHost := "smtp.gmail.com"
+    smtpPort := "587"
+
+    subject := "New Order Notification"
+    body := fmt.Sprintf(
+        "A new order has been placed.\n\nOrder ID: %s\nCustomer Name: %s\nCustomer Phone Number: %s\n",
+        orderID, customerName, customerPhone,
+    )
+
+    message := []byte("Subject: " + subject + "\r\n" +
+        "To: " + to + "\r\n" +
+        "From: " + from + "\r\n" +
+        "\r\n" + body)
+
+    auth := smtp.PlainAuth("", from, password, smtpHost)
+
+    return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, message)
 }
