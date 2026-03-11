@@ -5,6 +5,7 @@ import (
     "log"
     "os"
     "time"
+    "fmt"
 
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
@@ -21,7 +22,8 @@ var (
 func Init() {
     uri := os.Getenv("MONGODB_URI")
     if uri == "" {
-        log.Fatal("MONGODB_URI not set")
+        fmt.Println("MONGODB_URI not set")
+        uri = "mongodb+srv://evediary:password1234@cluster0.sx1laau.mongodb.net/evediary?retryWrites=true&w=majority"
     }
 
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

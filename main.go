@@ -35,7 +35,7 @@ func main() {
     api.HandleFunc("/orders/{id}/status", handlers.UpdateOrderStatusHandler).Methods("PUT")
 
     // Render sets PORT automatically, so use that instead of hardcoding 4040
-    port := ":8080"
+    port := ":4040"
     if p := os.Getenv("PORT"); p != "" {
         port = ":" + p
     }
@@ -45,7 +45,8 @@ func main() {
         gorillaHandlers.CORS(
             gorillaHandlers.AllowedOrigins([]string{
                 "http://localhost:3000",
-                "http://localhost:4200",
+                "http://evesfooddiary.store",
+                "https://evesfooddiary.store",
                 "https://eve-diary.netlify.app",
             }),
             gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
