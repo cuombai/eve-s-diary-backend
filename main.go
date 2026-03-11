@@ -47,6 +47,7 @@ func main() {
                 "http://localhost:3000",
                 "http://evesfooddiary.store",
                 "https://evesfooddiary.store",
+                "https://www.evesfooddiary.store",
                 "https://eve-diary.netlify.app",
             }),
             gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
