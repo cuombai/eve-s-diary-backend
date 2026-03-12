@@ -45,10 +45,11 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
     // 🔔 Send notification email with customer details
     go func() {
-        if err := SendOrderNotification(order.ID, order.CustomerName, order.CustomerPhone); err != nil {
+        if err := SendOrderNotification(order); err != nil {
             fmt.Println("Failed to send notification:", err)
         }
     }()
+
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(order)
