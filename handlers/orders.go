@@ -5,14 +5,16 @@ import (
     "encoding/json"
     "net/http"
     "time"
-
+    "log"
     "go.mongodb.org/mongo-driver/bson/primitive"
     "go.mongodb.org/mongo-driver/mongo"
     "github.com/gorilla/mux"
     "go.mongodb.org/mongo-driver/bson"
     "fmt"
-    "net/smtp"
+    "os"
     "eves-diary/models"
+    "github.com/sendgrid/sendgrid-go"
+    "github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 // Mongo collection injected from main.go or a db package
@@ -150,16 +152,12 @@ func UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(updatedOrder)
 }
 
-// SendOrderNotification sends an email notification when a new order is created
+
 func SendOrderNotification(orderID, customerName, customerPhone string) error {
-    from := "orders@evesfooddiary.store"
-    password := "Jesus4Life@2026" // your Private Email mailbox password
-    to := "curtisombai@gmail.com"
-
-    smtpHost := "mail.privateemail.com"
-    smtpPort := "587"
-
+    from := mail.NewEmail("Eves Food Diary Orders", "orders@evesfooddiary.store")
     subject := "New Order Notification"
+    to := mail.NewEmail("Curtis Ombai", "curtisombai@gmail.com")
+
     body := fmt.Sprintf(
         "A new order has been placed.\n\n"+
             "Order ID: %s\n"+
@@ -168,12 +166,16 @@ func SendOrderNotification(orderID, customerName, customerPhone string) error {
         orderID, customerName, customerPhone,
     )
 
-    message := []byte("Subject: " + subject + "\r\n" +
-        "To: " + to + "\r\n" +
-        "From: " + from + "\r\n" +
-        "\r\n" + body)
+    message := mail.NewSingleEmail(from, subject, to, body, body)
 
-    auth := smtp.PlainAuth("", from, password, smtpHost)
+    apiKey := os.Getenv("SENDGRID_API_KEY") // read from environment
+    client := sendgrid.NewSendClient(apiKey)
+    response, err := client.Send(message)
+    if err != nil {
+        log.Printf("SendGrid error: %v", err)
+        return err
+    }
 
-    return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, message)
+    log.Printf("Email sent! Status Code: %d", response.StatusCode)
+    return nil
 }
