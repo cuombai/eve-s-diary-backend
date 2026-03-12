@@ -153,22 +153,56 @@ func UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-func SendOrderNotification(orderID, customerName, customerPhone string) error {
+func SendOrderNotification(order models.Order) error {
     from := mail.NewEmail("Eves Food Diary Orders", "orders@evesfooddiary.store")
     subject := "New Order Notification"
     to := mail.NewEmail("Curtis Ombai", "curtisombai@gmail.com")
 
-    body := fmt.Sprintf(
-        "A new order has been placed.\n\n"+
-            "Order ID: %s\n"+
-            "Customer Name: %s\n"+
-            "Customer Phone Number: %s\n",
-        orderID, customerName, customerPhone,
+    // Build HTML body
+    itemsHTML := ""
+    for _, item := range order.Items {
+        itemsHTML += fmt.Sprintf(
+            "<tr><td>%s</td><td>%d</td><td>%.2f</td></tr>",
+            item.Item.Name, item.Quantity, item.Item.Price,
+        )
+    }
+
+    paymentCode := ""
+    if order.PaymentCode != nil {
+        paymentCode = *order.PaymentCode
+    }
+
+    htmlBody := fmt.Sprintf(`
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color:#2c3e50;">New Order Received</h2>
+            <p><strong>Order ID:</strong> %s</p>
+            <p><strong>Customer:</strong> %s (%s)</p>
+            <p><strong>Status:</strong> %s</p>
+            <p><strong>Payment Code:</strong> %s</p>
+            <h3>Items Ordered</h3>
+            <table style="border-collapse: collapse; width: 100%%;">
+                <tr style="background-color:#f2f2f2;">
+                    <th style="border:1px solid #ddd; padding:8px;">Item</th>
+                    <th style="border:1px solid #ddd; padding:8px;">Quantity</th>
+                    <th style="border:1px solid #ddd; padding:8px;">Price</th>
+                </tr>
+                %s
+            </table>
+            <p><strong>Total Price:</strong> %.2f</p>
+        </body>
+        </html>
+    `, order.ID, order.CustomerName, order.CustomerPhone, order.Status, paymentCode, itemsHTML, order.TotalPrice)
+
+    // Plain text fallback
+    textBody := fmt.Sprintf(
+        "Order ID: %s\nCustomer: %s (%s)\nStatus: %s\nPayment Code: %s\nTotal Price: %.2f\n",
+        order.ID, order.CustomerName, order.CustomerPhone, order.Status, paymentCode, order.TotalPrice,
     )
 
-    message := mail.NewSingleEmail(from, subject, to, body, body)
+    message := mail.NewSingleEmail(from, subject, to, textBody, htmlBody)
 
-    apiKey := os.Getenv("SENDGRID_API_KEY") // read from environment
+    apiKey := os.Getenv("SENDGRID_API_KEY")
     if apiKey == "" {
         log.Fatal("SENDGRID_API_KEY not set")
     }
