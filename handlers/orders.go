@@ -169,6 +169,9 @@ func SendOrderNotification(orderID, customerName, customerPhone string) error {
     message := mail.NewSingleEmail(from, subject, to, body, body)
 
     apiKey := os.Getenv("SENDGRID_API_KEY") // read from environment
+    if apiKey == "" {
+        log.Fatal("SENDGRID_API_KEY not set")
+    }
     client := sendgrid.NewSendClient(apiKey)
     response, err := client.Send(message)
     if err != nil {
