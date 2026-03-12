@@ -151,9 +151,9 @@ func UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // SendOrderNotification sends an email notification when a new order is created
-func SendOrderNotification(orderID string, customerName string, customerPhone string) error {
+func SendOrderNotification(orderID, customerName, customerPhone string) error {
     from := "orders@evesfooddiary.store"
-    password := "Jesus4Life@2026"
+    password := "Jesus4Life@2026" // your Private Email mailbox password
     to := "curtisombai@gmail.com"
 
     smtpHost := "mail.privateemail.com"
@@ -161,13 +161,10 @@ func SendOrderNotification(orderID string, customerName string, customerPhone st
 
     subject := "New Order Notification"
     body := fmt.Sprintf(
-        "
-            A new order has been placed.
-            Order ID: %s
-            Customer Name: %s
-            Customer Phone Number: %s
-            
-        ",
+        "A new order has been placed.\n\n"+
+            "Order ID: %s\n"+
+            "Customer Name: %s\n"+
+            "Customer Phone Number: %s\n",
         orderID, customerName, customerPhone,
     )
 
