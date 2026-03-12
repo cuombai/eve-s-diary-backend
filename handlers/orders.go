@@ -157,7 +157,7 @@ func UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
 func SendOrderNotification(order models.Order) error {
     from := mail.NewEmail("Eves Food Diary Orders", "orders@evesfooddiary.store")
     subject := "New Order Notification"
-    to := mail.NewEmail("Curtis Ombai", "curtisombai@gmail.com")
+    to := mail.NewEmail("Eve Adhiambo", "eveadhiambo16@gmail.com")
 
     // Build HTML body
     itemsHTML := ""
